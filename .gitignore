@@ -1,0 +1,21 @@
+# Виртуальное окружение
+venv/
+.venv/
+
+# База данных
+db.sqlite3
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Переменные окружения (секретные ключи)
+.env
+
+# VSCode
+.vscode/
+
+# Системные файлы
+.DS_Store
+Thumbs.db
