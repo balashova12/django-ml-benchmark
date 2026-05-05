@@ -2,13 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project</title>
+    <title>ML Benchmark</title>
 </head>
 <body>
-  <h2>Запуск алгоритмов</h2>
-  <a href="/run/logreg/">LogReg</a><br>
-  <a href="/run/knn/">KNN</a><br>
-  <a href="/run/tree/">Decision Tree</a><br>
+    <h1>ML Algorithm Benchmark</h1>
+
+    <h3>Свои алгоритмы</h3>
+    <button onclick="run('knn')">KNN</button>
+    <button onclick="run('tree')">Decision Tree</button>
+    <button onclick="run('logistic')">Logistic Regression</button>
+
+    <h3>Sklearn</h3>
+    <button onclick="run('knn_lib')">KNN</button>
+    <button onclick="run('tree_lib')">Decision Tree</button>
+    <button onclick="run('logistic_lib')">Logistic Regression</button>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Алгоритм</th>
+                <th>Время (сек)</th>
+                <th>Память (КБ)</th>
+                <th>Точность</th>
+            </tr>
+        </thead>
+        <tbody id="results"></tbody>
+    </table>
+
+    <script>
+        async function run(algorithm) {
+            const response = await fetch(`/run/${algorithm}/`);
+            const data = await response.json();
+            const tbody = document.getElementById('results');
+            tbody.innerHTML += `<tr>
+                <td>${algorithm}</td>
+                <td>${data.time}</td>
+                <td>${data.memory_kb}</td>
+                <td>${data.accuracy}</td>
+            </tr>`;
+        }
+    </script>
 </body>
 </html>
