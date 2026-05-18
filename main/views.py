@@ -11,7 +11,6 @@ from sklearn.metrics import accuracy_score
 from .algorithms import knn_predict, build_tree, tree_predict, train_logistic, logistic_predict
 import numpy as np
 
-# Загружаем данные один раз
 iris = datasets.load_iris()
 X = iris.data.tolist()
 y = iris.target.tolist()

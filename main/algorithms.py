@@ -103,7 +103,7 @@ def tree_predict(tree, X_test):
 
 # Logistic Regression
 def softmax(z):
-    exp_z = np.exp(z - np.max(z))  # np.max для стабильности вычислений
+    exp_z = np.exp(z - np.max(z))  
     return exp_z / exp_z.sum()
 
 def predict_proba(X, W, b):
@@ -115,7 +115,6 @@ def train_logistic(X, y, learning_rate=0.1, epochs=500):
     n_features = len(X[0])
     n_classes = len(set(y))
     
-    # начинаем с нулевых весов
     W = np.zeros((n_features, n_classes))
     b = np.zeros(n_classes)
     
@@ -123,19 +122,14 @@ def train_logistic(X, y, learning_rate=0.1, epochs=500):
     y = np.array(y)
     
     for epoch in range(epochs):
-        # 1. предсказываем вероятности для ВСЕХ точек
         probs = np.array([predict_proba(x, W, b) for x in X])
         
-        # 2. считаем ошибку — one hot encoding
-        # превращаем [0, 1, 2] в [[1,0,0], [0,1,0], [0,0,1]]
         y_onehot = np.zeros((n_samples, n_classes))
         for i, label in enumerate(y):
             y_onehot[i][label] = 1
         
-        # 3. считаем градиент (насколько веса неправильные)
         error = probs - y_onehot  
 
-        # 4. обновляем веса — твой код здесь
         W -= learning_rate * np.dot(X.T, error) / n_samples
         b -= learning_rate * error.mean(axis=0)
     

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>ML Benchmark</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>ML Algorithm Benchmark</h1>
@@ -29,17 +32,83 @@
         <tbody id="results"></tbody>
     </table>
 
+    <h3>Сравнение времени выполнения</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 40px; margin-top: 20px;">
+        <div style="flex: 1; min-width: 250px;"><canvas id="chartKnn"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chartTree"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chartLogistic"></canvas></div>
+    </div>
+
     <script>
+        const names = {
+            'knn': 'KNN (свой)',
+            'knn_lib': 'KNN (sklearn)',
+            'tree': 'Decision Tree (свой)',
+            'tree_lib': 'Decision Tree (sklearn)',
+            'logistic': 'Logistic Regression (свой)',
+            'logistic_lib': 'Logistic Regression (sklearn)',
+        };
+
+        const results = {};
+
         async function run(algorithm) {
             const response = await fetch(`/run/${algorithm}/`);
             const data = await response.json();
+            results[algorithm] = data;
+            renderTable();
+            renderChart(); 
+        }
+
+        function renderTable() {
             const tbody = document.getElementById('results');
-            tbody.innerHTML += `<tr>
-                <td>${algorithm}</td>
-                <td>${data.time}</td>
-                <td>${data.memory_kb}</td>
-                <td>${data.accuracy}</td>
-            </tr>`;
+            tbody.innerHTML = Object.entries(results).map(([alg, data]) => `
+                <tr>
+                    <td>${names[alg]}</td>
+                    <td>${data.time}</td>
+                    <td>${data.memory_kb}</td>
+                    <td>${data.accuracy}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChart() {
+            const groups = [
+                { id: 'chartKnn', label: 'KNN', custom: 'knn', lib: 'knn_lib' },
+                { id: 'chartTree', label: 'Decision Tree', custom: 'tree', lib: 'tree_lib' },
+                { id: 'chartLogistic', label: 'Logistic Regression', custom: 'logistic', lib: 'logistic_lib' },
+            ];
+
+            groups.forEach(group => {
+                if (!results[group.custom] && !results[group.lib]) return;
+
+                const ctx = document.getElementById(group.id).getContext('2d');
+                if (window[group.id + '_chart']) window[group.id + '_chart'].destroy();
+
+                window[group.id + '_chart'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Свой', 'Sklearn'],
+                        datasets: [{
+                            data: [
+                                results[group.custom] ? results[group.custom].time : 0,
+                                results[group.lib] ? results[group.lib].time : 0,
+                            ],
+                            backgroundColor: ['#4a90d9', '#27ae60'],
+                            borderRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: { display: true, text: group.label },
+                            legend: { display: false },
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'сек' } }
+                        }
+                    }
+                });
+            });
         }
     </script>
 </body>
