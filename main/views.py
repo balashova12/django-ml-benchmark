@@ -8,7 +8,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
-from .algorithms import knn_predict, build_tree, tree_predict, train_logistic, logistic_predict
+from .algorithms.knn import knn_predict
+from .algorithms.decision_tree import build_tree, tree_predict
+from .algorithms.logistic_regression import train_logistic, logistic_predict
 import numpy as np
 
 iris = datasets.load_iris()
