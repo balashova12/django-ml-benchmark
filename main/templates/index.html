@@ -32,11 +32,25 @@
         <tbody id="results"></tbody>
     </table>
 
-    <h3>Сравнение времени выполнения</h3>
+    <h3>Время выполнения</h3>
     <div style="display: flex; flex-wrap: wrap; gap: 40px; margin-top: 20px;">
-        <div style="flex: 1; min-width: 250px;"><canvas id="chartKnn"></canvas></div>
-        <div style="flex: 1; min-width: 250px;"><canvas id="chartTree"></canvas></div>
-        <div style="flex: 1; min-width: 250px;"><canvas id="chartLogistic"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartKnn_time"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartTree_time"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartLogistic_time"></canvas></div>
+    </div>
+
+    <h3>Использование памяти</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 40px; margin-top: 20px;">
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartKnn_memory_kb"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartTree_memory_kb"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartLogistic_memory_kb"></canvas></div>
+    </div>
+
+    <h3>Точность</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 40px; margin-top: 20px;">
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartKnn_accuracy"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartTree_accuracy"></canvas></div>
+        <div style="flex: 1; min-width: 250px;"><canvas id="chart_chartLogistic_accuracy"></canvas></div>
     </div>
 
     <script>
@@ -78,35 +92,46 @@
                 { id: 'chartLogistic', label: 'Logistic Regression', custom: 'logistic', lib: 'logistic_lib' },
             ];
 
+            const metrics = [
+                { key: 'time', label: 'сек', title: 'Время выполнения' },
+                { key: 'memory_kb', label: 'КБ', title: 'Память' },
+                { key: 'accuracy', label: '', title: 'Точность' },
+            ];
+
             groups.forEach(group => {
-                if (!results[group.custom] && !results[group.lib]) return;
+                metrics.forEach(metric => {
+                    const canvasId = `chart_${group.id}_${metric.key}`;
+                    const canvas = document.getElementById(canvasId);
+                    if (!canvas) return;
+                    if (!results[group.custom] && !results[group.lib]) return;
 
-                const ctx = document.getElementById(group.id).getContext('2d');
-                if (window[group.id + '_chart']) window[group.id + '_chart'].destroy();
+                    const ctx = canvas.getContext('2d');
+                    if (window[canvasId + '_chart']) window[canvasId + '_chart'].destroy();
 
-                window[group.id + '_chart'] = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Свой', 'Sklearn'],
-                        datasets: [{
-                            data: [
-                                results[group.custom] ? results[group.custom].time : 0,
-                                results[group.lib] ? results[group.lib].time : 0,
-                            ],
-                            backgroundColor: ['#4a90d9', '#27ae60'],
-                            borderRadius: 4,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: { display: true, text: group.label },
-                            legend: { display: false },
+                    window[canvasId + '_chart'] = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Свой', 'Sklearn'],
+                            datasets: [{
+                                data: [
+                                    results[group.custom] ? results[group.custom][metric.key] : 0,
+                                    results[group.lib] ? results[group.lib][metric.key] : 0,
+                                ],
+                                backgroundColor: ['#4a90d9', '#27ae60'],
+                                borderRadius: 4,
+                            }]
                         },
-                        scales: {
-                            y: { beginAtZero: true, title: { display: true, text: 'сек' } }
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: { display: true, text: `${group.label} — ${metric.title}` },
+                                legend: { display: false },
+                            },
+                            scales: {
+                                y: { beginAtZero: true, title: { display: true, text: metric.label } }
+                            }
                         }
-                    }
+                    });
                 });
             });
         }
